@@ -18,7 +18,7 @@ export default class Searchbar extends Component {
       this.resetForm();
       return;
     }
-    toast('Please, enter your request to search for pictures');
+    toast('Please, enter your request in search field');
   };
 
   resetForm = () => {
