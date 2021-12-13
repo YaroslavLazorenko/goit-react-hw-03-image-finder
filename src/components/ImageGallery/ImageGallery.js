@@ -2,6 +2,7 @@ import { Component } from 'react';
 import PicturesApiService from '../../services/pixabay-api';
 import Loader from 'react-loader-spinner';
 import { toast } from 'react-toastify';
+import { PropTypes } from 'prop-types';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import styles from './ImageGallery.module.css';
@@ -14,9 +15,22 @@ const Status = {
   RESOLVED: 'resolved',
   REJECTED: 'rejected',
 };
+const MAX_NUMBER_OF_ITEMS_IN_IMAGES_ARRAY = 12;
 
 export default class ImageGallery extends Component {
-  state = { status: Status.IDLE, imagesArray: [], error: null, isLoadMorePicturesRequested: false };
+  static propTypes = {
+    searchQuery: PropTypes.string.isRequired,
+    openModal: PropTypes.func.isRequired,
+  };
+
+  state = {
+    status: Status.IDLE,
+    imagesArray: [],
+    error: null,
+    isLoadMorePicturesRequested: false,
+    hasImagesArrayMaxNumberOfItems: false,
+  };
+
   picturesApiService = new PicturesApiService();
 
   componentDidUpdate(prevProps) {
@@ -24,6 +38,7 @@ export default class ImageGallery extends Component {
     const { isLoadMorePicturesRequested } = this.state;
 
     const isNewSearchQuery = prevProps.searchQuery !== searchQuery;
+
     if (isNewSearchQuery || isLoadMorePicturesRequested) {
       this.setState({ status: Status.PENDING });
       if (isLoadMorePicturesRequested) {
@@ -43,10 +58,21 @@ export default class ImageGallery extends Component {
           }),
         )
         .then(imagesArray => {
+          const hasImagesArrayMaxNumberOfItems =
+            imagesArray.length < MAX_NUMBER_OF_ITEMS_IN_IMAGES_ARRAY;
+          const isItemsInImagesArray = imagesArray.length !== 0;
+
+          if (isNewSearchQuery && !isItemsInImagesArray) {
+            this.showMessage(
+              'There are no results on your search query. Please, enter another request.',
+            );
+          }
+
           this.setState(prevState => {
             return {
               imagesArray: [...prevState.imagesArray, ...imagesArray],
               status: Status.RESOLVED,
+              hasImagesArrayMaxNumberOfItems,
             };
           });
         })
@@ -64,7 +90,7 @@ export default class ImageGallery extends Component {
 
   render() {
     const { openModal } = this.props;
-    const { status, imagesArray, error } = this.state;
+    const { status, imagesArray, error, hasImagesArrayMaxNumberOfItems } = this.state;
     const isItemsInImagesArray = imagesArray.length !== 0;
 
     if (status === Status.IDLE) {
@@ -78,10 +104,6 @@ export default class ImageGallery extends Component {
     if (status === Status.REJECTED) {
       this.showMessage(error.message);
       return <p className={styles['ImageGallery-text']}>Error fetching data</p>;
-    }
-
-    if (status === Status.RESOLVED && !isItemsInImagesArray) {
-      this.showMessage('There are no results on your search query. Please, enter another request.');
     }
 
     return (
@@ -101,12 +123,14 @@ export default class ImageGallery extends Component {
             })}
           </ul>
         )}
+
         {status === Status.PENDING && (
           <div className={styles['Loader-container']}>
             <Loader type="Puff" color="#00BFFF" height={300} width={300} />
           </div>
         )}
-        {isItemsInImagesArray &&
+
+        {!hasImagesArrayMaxNumberOfItems &&
           status === Status.RESOLVED &&
           !this.picturesApiService.reachMaxPage() && (
             <Button loadMorePictures={this.loadMorePictures} />

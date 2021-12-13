@@ -29,7 +29,9 @@ class App extends Component {
         <Searchbar onSubmit={this.onSubmitSearchQuery} />
         <main>
           <ImageGallery searchQuery={searchQuery} openModal={this.openModal} />
-          {showModal && <Modal largeImageURL={largeImageURL} tags={tags} />}
+          {showModal && (
+            <Modal closeModal={this.toggleModal} largeImageURL={largeImageURL} tags={tags} />
+          )}
           <ToastContainer autoClose={3000} />
         </main>
       </div>
