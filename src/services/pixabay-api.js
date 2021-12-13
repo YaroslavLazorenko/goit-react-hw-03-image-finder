@@ -21,16 +21,8 @@ export default class PicturesApiService {
     return Promise.reject(new Error('Error fetching data'));
   }
 
-  get query() {
-    return this.searchQuery;
-  }
-
   set query(newQuery) {
     this.searchQuery = newQuery;
-  }
-
-  get isFirstPage() {
-    return this.page === 1;
   }
 
   incPage() {
@@ -42,6 +34,6 @@ export default class PicturesApiService {
   }
 
   reachMaxPage() {
-    return this.page > this.MAX_PAGES ? true : false;
+    return this.page >= this.MAX_PAGES ? true : false;
   }
 }

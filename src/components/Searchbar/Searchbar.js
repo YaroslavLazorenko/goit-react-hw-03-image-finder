@@ -1,6 +1,7 @@
 import { Component } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import styles from './Searchbar.module.css';
 
 export default class Searchbar extends Component {
   state = { value: '' };
@@ -18,7 +19,7 @@ export default class Searchbar extends Component {
       this.resetForm();
       return;
     }
-    toast('Please, enter your request in search field');
+    toast('Please, enter your request in search field', { toastId: 'Searchbar-toast' });
   };
 
   resetForm = () => {
@@ -29,14 +30,14 @@ export default class Searchbar extends Component {
     const { value } = this.state;
 
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.onSubmit}>
-          <button type="submit" className="button">
-            <span className="button-label">Search</span>
+      <header className={styles.Searchbar}>
+        <form className={styles.SearchForm} onSubmit={this.onSubmit}>
+          <button type="submit" className={styles['SearchForm-button']}>
+            <span className={styles['SearchForm-button-label']}>Search</span>
           </button>
 
           <input
-            className="input"
+            className={styles['SearchForm-input']}
             type="text"
             autoComplete="off"
             autoFocus
@@ -45,7 +46,6 @@ export default class Searchbar extends Component {
             onChange={this.onChange}
           />
         </form>
-        <ToastContainer autoClose={3000} />
       </header>
     );
   }
